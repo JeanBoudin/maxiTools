@@ -12,6 +12,10 @@ import OverlaysCameraView from './views/OverlaysCameraView.vue'
 import CameraCircleOverlayView from './views/CameraCircleOverlayView.vue'
 import OverlaysCameraShapeView from './views/OverlaysCameraShapeView.vue'
 import OverlayMaskGeneratorView from './views/OverlayMaskGeneratorView.vue'
+import StreamDnaOverlayView from './views/StreamDnaOverlayView.vue'
+import OverlaysDnaView from './views/OverlaysDnaView.vue'
+import WaitingOverlayView from './views/WaitingOverlayView.vue'
+import OverlaysWaitingView from './views/OverlaysWaitingView.vue'
 import { clearAccount, setAccount, useAccount } from './state/account'
 
 const router = createRouter({
@@ -22,6 +26,8 @@ const router = createRouter({
     { path: '/overlays', name: 'overlays', component: OverlaysView, meta: { requiresAuth: true } },
     { path: '/overlays/camera', name: 'overlays-camera', component: OverlaysCameraView, meta: { requiresAuth: true } },
     { path: '/overlays/masks', name: 'overlays-masks', component: OverlayMaskGeneratorView, meta: { requiresAuth: true } },
+    { path: '/overlays/dna', name: 'overlays-dna', component: OverlaysDnaView, meta: { requiresAuth: true } },
+    { path: '/overlays/waiting', name: 'overlays-waiting', component: OverlaysWaitingView, meta: { requiresAuth: true } },
     {
       path: '/overlays/camera/shapes',
       name: 'overlays-camera-shapes',
@@ -35,6 +41,8 @@ const router = createRouter({
     { path: '/overlay/promo', name: 'overlay-promo', component: PromoOverlayView },
     { path: '/overlay/camera', name: 'overlay-camera', component: CameraFrameOverlayView },
     { path: '/overlay/camera/circle', name: 'overlay-camera-circle', component: CameraCircleOverlayView },
+    { path: '/overlay/dna', name: 'overlay-dna', component: StreamDnaOverlayView },
+    { path: '/overlay/waiting', name: 'overlay-waiting', component: WaitingOverlayView },
   ],
 })
 

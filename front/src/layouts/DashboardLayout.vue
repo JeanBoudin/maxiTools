@@ -81,6 +81,12 @@ onMounted(() => {
             <router-link class="nav-item nav-sub-item" to="/overlays/masks" active-class="is-active">
               Masques PNG
             </router-link>
+            <router-link class="nav-item nav-sub-item" to="/overlays/dna" active-class="is-active">
+              Stream DNA
+            </router-link>
+            <router-link class="nav-item nav-sub-item" to="/overlays/waiting" active-class="is-active">
+              Écran d’attente
+            </router-link>
           </div>
         </div>
         <router-link class="nav-item" to="/promos" active-class="is-active">Promos</router-link>
