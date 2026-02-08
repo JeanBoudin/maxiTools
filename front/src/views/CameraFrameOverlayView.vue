@@ -55,7 +55,7 @@ onUnmounted(() => {
       <div class="camera-frame-box-inner"></div>
       <div v-if="goalEnabled" class="camera-goal">
         <div class="camera-goal-row">
-          <span class="camera-goal-title">⭐ {{ goalTitle }}</span>
+          <span class="camera-goal-title">{{ goalTitle }}</span>
           <span>{{ goalCurrent }}/{{ goalTarget }}</span>
         </div>
         <div class="camera-goal-progress">

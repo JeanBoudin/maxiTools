@@ -451,8 +451,8 @@ h3 {
   width: min(70vw, 900px);
   aspect-ratio: 16 / 9;
   border-radius: 0;
-  border: 6px solid rgba(255, 255, 255, 0.9);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+  border: none;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
   display: grid;
   place-items: center;
   position: relative;
