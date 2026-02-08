@@ -17,6 +17,7 @@ async function fetchAccount() {
     })
 
     if (!response.ok) {
+      clearAccount()
       return
     }
 
@@ -76,6 +77,9 @@ onMounted(() => {
               active-class="is-active"
             >
               Formes caméra
+            </router-link>
+            <router-link class="nav-item nav-sub-item" to="/overlays/masks" active-class="is-active">
+              Masques PNG
             </router-link>
           </div>
         </div>

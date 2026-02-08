@@ -11,6 +11,7 @@ import CameraFrameOverlayView from './views/CameraFrameOverlayView.vue'
 import OverlaysCameraView from './views/OverlaysCameraView.vue'
 import CameraCircleOverlayView from './views/CameraCircleOverlayView.vue'
 import OverlaysCameraShapeView from './views/OverlaysCameraShapeView.vue'
+import OverlayMaskGeneratorView from './views/OverlayMaskGeneratorView.vue'
 import { clearAccount, setAccount, useAccount } from './state/account'
 
 const router = createRouter({
@@ -20,6 +21,7 @@ const router = createRouter({
     { path: '/', name: 'home', component: HomeView, meta: { requiresAuth: true } },
     { path: '/overlays', name: 'overlays', component: OverlaysView, meta: { requiresAuth: true } },
     { path: '/overlays/camera', name: 'overlays-camera', component: OverlaysCameraView, meta: { requiresAuth: true } },
+    { path: '/overlays/masks', name: 'overlays-masks', component: OverlayMaskGeneratorView, meta: { requiresAuth: true } },
     {
       path: '/overlays/camera/shapes',
       name: 'overlays-camera-shapes',
@@ -42,10 +44,6 @@ router.beforeEach(async (to) => {
   if (to.path === '/login') {
     const account = useAccount()
 
-    if (account.overlayKey) {
-      return { path: '/' }
-    }
-
     try {
       const response = await fetch(`${backendUrl}/api/me`, {
         credentials: 'include',
@@ -59,15 +57,10 @@ router.beforeEach(async (to) => {
     } catch (err) {
       // ignore
     }
+    clearAccount()
   }
 
   if (!to.meta.requiresAuth) {
-    return true
-  }
-
-  const account = useAccount()
-
-  if (account.overlayKey) {
     return true
   }
 
