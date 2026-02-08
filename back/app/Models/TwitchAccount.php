@@ -36,6 +36,11 @@ class TwitchAccount extends Model
         return $this->hasOne(CameraFrameSetting::class);
     }
 
+    public function obsSetting(): HasOne
+    {
+        return $this->hasOne(ObsSetting::class);
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

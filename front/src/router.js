@@ -16,6 +16,7 @@ import StreamDnaOverlayView from './views/StreamDnaOverlayView.vue'
 import OverlaysDnaView from './views/OverlaysDnaView.vue'
 import WaitingOverlayView from './views/WaitingOverlayView.vue'
 import OverlaysWaitingView from './views/OverlaysWaitingView.vue'
+import ObsSceneSwitchView from './views/ObsSceneSwitchView.vue'
 import { clearAccount, setAccount, useAccount } from './state/account'
 
 const router = createRouter({
@@ -35,6 +36,7 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     { path: '/promos', name: 'promos', component: PromosView, meta: { requiresAuth: true } },
+    { path: '/obs-scenes', name: 'obs-scenes', component: ObsSceneSwitchView, meta: { requiresAuth: true } },
     { path: '/settings', name: 'settings', component: SettingsView, meta: { requiresAuth: true } },
     { path: '/auth/callback', name: 'auth-callback', component: AuthCallback },
     { path: '/overlay', name: 'overlay', component: OverlayView },

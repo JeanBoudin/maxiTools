@@ -90,6 +90,7 @@ onMounted(() => {
           </div>
         </div>
         <router-link class="nav-item" to="/promos" active-class="is-active">Promos</router-link>
+        <router-link class="nav-item" to="/obs-scenes" active-class="is-active">OBS Scenes</router-link>
         <router-link class="nav-item" to="/settings" active-class="is-active">Réglages</router-link>
       </nav>
 
