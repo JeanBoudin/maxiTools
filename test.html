@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Text Around Circle - Twitch API</title>
+  <style>
+    body {
+      background-color: #000;
+      display: grid;
+      place-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+    
+    text {
+      fill: white;
+      font-family: "Lato", sans-serif;
+      font-size: 22px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 6px;
+      animation: rotate 50s linear infinite;
+      transform-origin: 250px 250px;
+    }
+    
+    svg {
+      max-width: 80vmin;
+    }
+    
+    @keyframes rotate {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .textcircle {
+      transition: transform 1s cubic-bezier(0.65, 0, 0.35, 1);
+      transform-origin: 250px 250px;
+    }
+  </style>
+</head>
+<body>
+
+  <svg viewBox="0 0 500 500">
+    <defs>
+      <!-- Chemin circulaire (cercle de rayon 150px autour du centre 250,250) -->
+      <path id="textcircle" 
+            d="M250,400
+               a150,150 0 0,1 0,-300
+               a150,150 0 0,1 0,300Z" 
+            transform="rotate(12,250,250)" />
+    </defs>
+
+    <g class="textcircle">
+      <!-- On donne un id au textPath pour pouvoir le cibler en JavaScript -->
+      <text textLength="940">
+        <textPath xlink:href="#textcircle" textLength="940" id="statsText">
+          Loading...
+        </textPath>
+      </text>
+    </g>
+  </svg>
+
+  <script>
+    // Remplacez ces constantes par vos informations réelles
+    const clientID = 'YOUR_CLIENT_ID';
+    const accessToken = 'YOUR_ACCESS_TOKEN';
+    const channelName = 'YOUR_CHANNEL_NAME';
+
+    // Fonction asynchrone pour récupérer les stats depuis l'API Twitch
+    async function getTwitchStats() {
+      try {
+        // 1. Obtenir les informations de l'utilisateur pour récupérer son ID
+        const userResponse = await fetch(`https://api.twitch.tv/helix/users?login=${channelName}`, {
+          headers: {
+            'Client-ID': clientID,
+            'Authorization': `Bearer ${accessToken}`
+          }
+        });
+        const userData = await userResponse.json();
+        if (!userData.data || userData.data.length === 0) {
+          throw new Error('Utilisateur non trouvé');
+        }
+        const userId = userData.data[0].id;
+
+        // 2. Récupérer le nombre de viewers en consultant l'endpoint "streams"
+        const streamResponse = await fetch(`https://api.twitch.tv/helix/streams?user_id=${userId}`, {
+          headers: {
+            'Client-ID': clientID,
+            'Authorization': `Bearer ${accessToken}`
+          }
+        });
+        const streamData = await streamResponse.json();
+        let viewerCount = 0;
+        if (streamData.data && streamData.data.length > 0) {
+          viewerCount = streamData.data[0].viewer_count;
+        }
+
+        // 3. Récupérer le nombre de followers
+        const followerResponse = await fetch(`https://api.twitch.tv/helix/users/follows?to_id=${userId}`, {
+          headers: {
+            'Client-ID': clientID,
+            'Authorization': `Bearer ${accessToken}`
+          }
+        });
+        const followerData = await followerResponse.json();
+        const followerCount = followerData.total;
+
+        // 4. Récupérer le nombre d'abonnés (subscriptions)
+        // Attention : cet endpoint nécessite des droits spécifiques
+        const subResponse = await fetch(`https://api.twitch.tv/helix/subscriptions?broadcaster_id=${userId}`, {
+          headers: {
+            'Client-ID': clientID,
+            'Authorization': `Bearer ${accessToken}`
+          }
+        });
+        const subData = await subResponse.json();
+        const subCount = subData.total ? subData.total : 0;
+
+        return { viewerCount, followerCount, subCount };
+
+      } catch (error) {
+        console.error('Erreur lors de la récupération des données Twitch :', error);
+        return { viewerCount: 0, followerCount: 0, subCount: 0 };
+      }
+    }
+
+    // Fonction pour mettre à jour le texte affiché dans le SVG
+    function updateStatsDisplay(stats) {
+      // Récupérer l'heure sans les secondes
+      const currentTime = new Date().toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      const statsTextEl = document.getElementById("statsText");
+      statsTextEl.textContent = 
+        `VIEWERS: ${stats.viewerCount} — FOLLOWERS: ${stats.followerCount} — SUBS: ${stats.subCount} — TIME: ${currentTime} • `;
+    }
+
+    // Fonction principale pour récupérer les données et mettre à jour l'affichage
+    async function fetchAndUpdateStats() {
+      const stats = await getTwitchStats();
+      updateStatsDisplay(stats);
+    }
+
+    // Mise à jour initiale au chargement
+    fetchAndUpdateStats();
+
+    // Rafraîchissement des données toutes les 30 secondes
+    setInterval(fetchAndUpdateStats, 30000);
+  </script>
+
+</body>
+</html>
