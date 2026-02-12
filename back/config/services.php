@@ -44,4 +44,12 @@ return [
         'frontend_redirect_path' => env('FRONTEND_OAUTH_REDIRECT_PATH', '/auth/callback'),
     ],
 
+    'spotify' => [
+        'client_id' => env('SPOTIFY_CLIENT_ID'),
+        'client_secret' => env('SPOTIFY_CLIENT_SECRET'),
+        'redirect_uri' => env('SPOTIFY_REDIRECT_URI'),
+        'scopes' => array_filter(explode(' ', env('SPOTIFY_SCOPES', 'user-read-currently-playing user-read-playback-state'))),
+        'frontend_url' => env('FRONTEND_URL', 'http://localhost:5173'),
+    ],
+
 ];

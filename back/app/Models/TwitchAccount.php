@@ -41,6 +41,11 @@ class TwitchAccount extends Model
         return $this->hasOne(ObsSetting::class);
     }
 
+    public function spotifyAccount(): HasOne
+    {
+        return $this->hasOne(SpotifyAccount::class);
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

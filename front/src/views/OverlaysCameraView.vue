@@ -16,6 +16,15 @@ const subGoalTitle = ref('Objectif d’abonnement')
 const subGoalCurrent = ref(0)
 const subGoalTarget = ref(10)
 const subGoalSubtitle = ref('Nouveaux abonnements')
+const rotationEnabled = ref(false)
+const rotationIntervalSeconds = ref(12)
+const rotationItems = ref(['sub_goal', 'now_playing'])
+const nowPlayingTitle = ref('Musique en cours')
+const nowPlayingEmpty = ref('Rien en lecture')
+
+const spotifyConnected = ref(false)
+const spotifyName = ref('')
+const spotifyNowPlaying = ref('')
 
 const cameraUrl = computed(() => {
   if (!account.overlayKey) return `${window.location.origin}/overlay/camera`
@@ -46,6 +55,11 @@ async function fetchSettings() {
     subGoalCurrent.value = Number(data.sub_goal_current ?? subGoalCurrent.value)
     subGoalTarget.value = Number(data.sub_goal_target ?? subGoalTarget.value)
     subGoalSubtitle.value = data.sub_goal_subtitle || subGoalSubtitle.value
+    rotationEnabled.value = Boolean(data.rotation_enabled)
+    rotationIntervalSeconds.value = Number(data.rotation_interval_seconds ?? rotationIntervalSeconds.value)
+    rotationItems.value = Array.isArray(data.rotation_items) ? data.rotation_items : rotationItems.value
+    nowPlayingTitle.value = data.now_playing_title || nowPlayingTitle.value
+    nowPlayingEmpty.value = data.now_playing_empty || nowPlayingEmpty.value
   } catch (err) {
     error.value = 'Impossible de charger les réglages.'
   } finally {
@@ -71,6 +85,11 @@ async function saveSettings() {
         sub_goal_current: subGoalCurrent.value,
         sub_goal_target: subGoalTarget.value,
         sub_goal_subtitle: subGoalSubtitle.value,
+        rotation_enabled: rotationEnabled.value,
+        rotation_interval_seconds: rotationIntervalSeconds.value,
+        rotation_items: rotationItems.value,
+        now_playing_title: nowPlayingTitle.value,
+        now_playing_empty: nowPlayingEmpty.value,
       }),
     })
 
@@ -86,8 +105,38 @@ async function saveSettings() {
   }
 }
 
+async function fetchSpotifyStatus() {
+  if (!account.overlayKey) return
+  try {
+    const response = await fetch(`${backendUrl}/api/spotify/status`, {
+      credentials: 'include',
+    })
+    if (!response.ok) {
+      spotifyConnected.value = false
+      return
+    }
+    const data = await response.json()
+    spotifyConnected.value = Boolean(data.connected)
+    spotifyName.value = data.display_name || ''
+    if (data.now_playing && data.now_playing.track) {
+      const artist = data.now_playing.artist ? ` · ${data.now_playing.artist}` : ''
+      spotifyNowPlaying.value = `${data.now_playing.track}${artist}`
+    } else {
+      spotifyNowPlaying.value = ''
+    }
+  } catch (err) {
+    spotifyConnected.value = false
+  }
+}
+
+function connectSpotify() {
+  const returnTo = encodeURIComponent(window.location.origin + '/overlays/camera')
+  window.location.href = `${backendUrl}/auth/spotify/redirect?return_to=${returnTo}`
+}
+
 onMounted(() => {
   fetchSettings()
+  fetchSpotifyStatus()
   previewNonce.value += 1
 })
 
@@ -96,6 +145,7 @@ watch(
   (value, oldValue) => {
     if (value && value !== oldValue) {
       fetchSettings()
+      fetchSpotifyStatus()
     }
   }
 )
@@ -168,6 +218,79 @@ watch(
         </div>
         <p v-if="error" class="form-error">{{ error }}</p>
         <p v-if="!account.overlayKey" class="micro">Connecte Twitch pour sauvegarder côté serveur.</p>
+      </article>
+
+      <article class="bento-card">
+        <div class="bento-head">
+          <h3>Rotation automatique</h3>
+          <span class="tag">Bloc objectif</span>
+        </div>
+        <p class="subtitle">Fais tourner plusieurs contenus dans le bandeau.</p>
+        <div class="form-grid">
+          <label class="form-field">
+            <span class="label">Activer la rotation</span>
+            <select v-model="rotationEnabled" class="input" :disabled="loading">
+              <option :value="true">Oui</option>
+              <option :value="false">Non</option>
+            </select>
+          </label>
+          <label class="form-field">
+            <span class="label">Intervalle (secondes)</span>
+            <input
+              v-model.number="rotationIntervalSeconds"
+              class="input"
+              type="number"
+              min="4"
+              max="120"
+              :disabled="loading"
+            />
+          </label>
+          <div class="form-field">
+            <span class="label">Contenus</span>
+            <label class="toggle">
+              <input v-model="rotationItems" type="checkbox" value="sub_goal" />
+              <span>Objectif abonnés</span>
+            </label>
+            <label class="toggle">
+              <input v-model="rotationItems" type="checkbox" value="now_playing" />
+              <span>Spotify – Musique en cours</span>
+            </label>
+          </div>
+          <label class="form-field">
+            <span class="label">Titre musique</span>
+            <input v-model="nowPlayingTitle" class="input" type="text" :disabled="loading" />
+          </label>
+          <label class="form-field">
+            <span class="label">Texte si rien ne joue</span>
+            <input v-model="nowPlayingEmpty" class="input" type="text" :disabled="loading" />
+          </label>
+        </div>
+        <div class="bento-actions">
+          <button class="primary" type="button" @click="saveSettings" :disabled="loading">
+            {{ saved ? 'Sauvegardé' : loading ? 'Sauvegarde…' : 'Sauvegarder' }}
+          </button>
+        </div>
+      </article>
+
+      <article class="bento-card">
+        <div class="bento-head">
+          <h3>Spotify</h3>
+          <span class="tag">{{ spotifyConnected ? 'Connecté' : 'Déconnecté' }}</span>
+        </div>
+        <p class="subtitle">Affiche la musique en cours dans le bandeau.</p>
+        <div class="bento-body">
+          <p class="label">Statut</p>
+          <p class="mono">
+            {{ spotifyConnected ? `Connecté · ${spotifyName || 'Spotify'}` : 'Non connecté' }}
+          </p>
+          <p v-if="spotifyNowPlaying" class="subtitle">En lecture: {{ spotifyNowPlaying }}</p>
+        </div>
+        <div class="bento-actions">
+          <button class="primary" type="button" @click="connectSpotify">
+            {{ spotifyConnected ? 'Reconnecter Spotify' : 'Connecter Spotify' }}
+          </button>
+          <button class="ghost" type="button" @click="fetchSpotifyStatus">Rafraîchir</button>
+        </div>
       </article>
 
       <article class="bento-card">
